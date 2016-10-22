@@ -1,0 +1,110 @@
+#!/bin/bash
+#
+#   MobileIron Core MICS backup verification Nagios check script
+#
+#   Copyright (C) 2016  Gary McConnell - Clever Consulting Srl.
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# ####################################################
+# Set the script name variables
+# ####################################################
+mSCRIPTNAME=$(basename $0)
+mTEMP="$mSCRIPTNAME.XXXXXXXXXX"
+
+
+# ####################################################
+# Check for correct number of arguments/variables set
+# ####################################################
+if [ -z "$3" ]
+  then
+    echo "usage: check_mi_mics_backup <HOSTNAME> <USERNAME> <PASSWORD>"
+    exit 3
+fi
+
+# ####################################################
+# Set the script Variables
+# ####################################################
+mVSP=$1
+mVSP_USERNAME=$2
+mVSP_PASSWORD=$3
+mFILEJSON=/usr/lib64/nagios/plugins/check_mi_JSON
+mCOOKIES=$(mktemp "/tmp/$mTEMP")
+mFILETMP1=$(mktemp "/tmp/$mTEMP")
+mFILETMP3=$(mktemp "/tmp/$mTEMP")
+
+
+# ####################################################
+# Remote Call to MobileIron Service Login
+# ####################################################
+curl -k --data "j_username=$mVSP_USERNAME&j_password=$mVSP_PASSWORD&spid=&submit=LOGIN" -H "Referer: https://$mVSP/mics/login.jsp" https://$mVSP/mics/j_spring_security_check --cookie-jar $mCOOKIES --location > $mFILETMP1
+
+# get NONCE Value
+mCSRFKEY=$(cat $mFILETMP1 | grep csrfKey | tr -s " " | cut -d "\"" -f2)
+mCSRFVALUE=$(cat $mFILETMP1 | grep csrfNonce | tr -s " " | cut -d "\"" -f2)
+
+
+# ####################################################
+# get last backup status
+# ####################################################
+mURL="https://$mVSP/mics/mics.html?_dc=1414958231438&action=getBackupRunningStatus"
+mOUTFILE=$mFILETMP3
+	
+# verifying the version and apply the correct authUserId to the curl command     
+mVSP_VERSION=$(cat $mFILETMP1 | grep releaseVersion | tr -s " " | cut -d "." -f1 | cut -d "P" -f2)
+mVSP_AUTHUSERID=$mVSP_USERNAME
+
+case $mVSP_VERSION in
+	" 6") mVSP_AUTHUSERID=$mVSP_USERNAME;;
+	" 7") mVSP_AUTHUSERID=$(printf $mVSP_USERNAME | base64);;
+esac
+		
+curl -k \
+     -H Origin:https://$mVSP \
+     -H "$mCSRFKEY: $mCSRFVALUE" \
+     -H "X-Requested-With:XMLHttpRequest" \
+     -H "authUserId:$mVSP_AUTHUSERID" \
+     -H "Content-type:application/x-www-form-urlencoded; charset=UTF-8" \
+     -H "Referer:https://$mVSP/mics/mics.html" \
+     $mURL \
+     --cookie $mCOOKIES \
+     --location > $mOUTFILE
+		
+mBACKUPLASTDATE=$(cat $mOUTFILE | $mFILEJSON -b | grep "lastBackupTime" | cut -f2 ) 
+mBACKUPLASTSTATUS=$(cat $mOUTFILE | $mFILEJSON -b | grep "lastBackupStatus" | cut -f2 )
+BKUPDATE=`date +"%a %b %d"`
+mBACKUPDATECHECK=$(echo "$mBACKUPLASTDATE" | grep "$BKUPDATE")
+
+# ####################################################
+# Delete all files created during process
+# ####################################################
+rm -rf  $mCOOKIES
+rm -rf $mFILETMP1
+rm -rf $mFILETMP3
+	
+
+	
+# ####################################################
+# Exit script
+# ####################################################
+if [[ "$mBACKUPDATECHECK" == "" ]]; then
+    echo "BACKUP Not Run: last backup date was $mBACKUPLASTDATE"
+    exit 2
+elif [[ "$mBACKUPLASTSTATUS" == "false" ]]; then
+   	echo "Attention, BACKUP run but Failed"
+   	exit 1
+else
+   	echo "BACKUP OK: last backup - $mBACKUPLASTDATE , $mBACKUPLASTSTATUS"
+   	exit 0
+fi

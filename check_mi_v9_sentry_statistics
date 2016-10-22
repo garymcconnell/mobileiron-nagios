@@ -1,0 +1,111 @@
+#!/bin/bash
+#
+# check_mi_sentry_statistics
+# MobileIron Sentry Statistics
+#
+# 2014 Clever Consulting Srl
+#
+#set -x 
+
+# Set the script name variables
+mSCRIPTNAME=$(basename $0)
+mTEMP="$mSCRIPTNAME.XXXXXXXXXX"
+
+# ####################################################
+# Check for correct number of arguments/variables set
+# ####################################################
+if [ -z "$4" ]
+  then
+    echo "usage: $mSCRIPTNAME <HOSTNAME> <USERNAME> <PASSWORD> <STATISTIC>"
+    exit 3
+fi
+
+# ####################################################
+# Set the script Variables
+# ####################################################
+mVSP=$1
+mVSP_USERNAME=$2
+mVSP_PASSWORD=$3
+#set the statistic to check
+mSTATISTIC=$4
+
+mTMP_DIR="/tmp"
+mCOOKIES=$(mktemp "$mTMP_DIR/$mTEMP.Cookies")
+mFILETMP1=$(mktemp "$mTMP_DIR/$mTEMP.1")
+mFILETMP2=$(mktemp "$mTMP_DIR/$mTEMP.2")
+
+# ####################################################
+# Remote Call to MobileIron Service Login
+# ####################################################
+curl -k --data "j_username=$mVSP_USERNAME&j_password=$mVSP_PASSWORD&spid=&submit=LOGIN" -H "Referer: https://$mVSP/mics/login.jsp" https://$mVSP/mics/j_spring_security_check --cookie-jar $mCOOKIES --location > $mFILETMP1
+
+# get NONCE Value
+mCSRFKEY=$(cat $mFILETMP1 | grep csrfKey | tr -s " " | cut -d "\"" -f2)
+mCSRFVALUE=$(cat $mFILETMP1 | grep csrfNonce | tr -s " " | cut -d "\"" -f2)
+echo "MobileIron Login response results: $mFILETMP1"
+
+echo "MobileIron $mCSRFKEY - $mCSRFVALUE"
+
+# ####################################################
+# Remote Call to MobileIron Sentry Statistics
+# ####################################################
+curl -k "https://$mVSP/mics/mics.html?_dc=`date +%s`&&action=getSentryUtilization&command=getSentryUtilization" --cookie $mCOOKIES  -H "$mCSRFKEY: $mCSRFVALUE" --location  > $mFILETMP2
+echo "MobileIron Sentry response results: $mFILETMP2"
+mEXIT=3
+
+# Use the Statistic argument to retrieve the statistics 
+case $mSTATISTIC in
+"devices")
+	mSTATISTICVALUE=$(cat $mFILETMP2 | grep "utilization" | cut -f2 | xargs | cut -d ":" -f4 | cut -d "\\" -f1)
+  	mSTATISTICSTRING="Number of Connected Devices  :"
+  	mEXIT=0
+  	
+  	echo "String $mSTATISTICSTRING"
+  	echo "Value $mSTATISTICVALUE"
+  	exit 1
+  ;;
+"connections")
+  	mSTATISTICVALUE=$(cat $mFILETMP2 | grep "utilization" | cut -f2 | xargs | cut -d ":" -f5 | cut -d "\\" -f1)
+  	mSTATISTICSTRING="Number of Open Connections   :"
+  	mEXIT=0
+  ;;
+"thread")
+  	mSTATISTICVALUE=$(cat $mFILETMP2 | grep "utilization" | cut -f2 | xargs | cut -d ":" -f6 | cut -d "\\" -f1)
+  	mSTATISTICSTRING="Thread Pool Utilization      :"
+  	mEXIT=0
+  ;;
+"cpu")
+  	mSTATISTICVALUE=$(cat $mFILETMP2 | grep "utilization" | cut -f2 | xargs | cut -d ":" -f7 | cut -d "\\" -f1)
+  	mSTATISTICSTRING="CPU Utilization              :"
+  	mEXIT=0
+  ;;
+"system")
+  	mSTATISTICVALUE=$(cat $mFILETMP2 | grep "utilization" | cut -f2 | xargs | cut -d ":" -f8 | cut -d "\\" -f1)
+  	mSTATISTICSTRING="System Memory Utilization    :"
+  	mEXIT=0
+  ;;
+"heap")
+  	mSTATISTICVALUE=$(cat $mFILETMP2 | grep "utilization" | cut -f2 | xargs | cut -d ":" -f9 | cut -d "\\" -f1)
+  	mSTATISTICSTRING="Heap Memory Utilization      :"
+  	mEXIT=0
+  ;;
+esac
+
+# ####################################################
+# Delete all files created during process
+# ####################################################
+rm -rf $mCOOKIES
+rm -rf $mFILETMP1
+rm -rf $mFILETMP2
+
+# ####################################################
+# Exit script
+# ####################################################
+if [[ $mEXIT = 0 ]]; then
+	mPERFDATASTATISTICVALUE=$(echo "$mSTATISTICVALUE" | cut -d " " -f2) 
+   	echo "$mSTATISTICSTRING$mSTATISTICVALUE | $4=$mPERFDATASTATISTICVALUE"
+	exit $mEXIT
+else
+   	echo "Check failed. You must use parameter statistic on devices,connections,thread,cpu,system or heap"
+   	exit 3
+fi

@@ -1,0 +1,124 @@
+#!/bin/bash
+#
+#   MobileIron Sentry Statistics Nagios check script
+#
+#   Copyright (C) 2016  Gary McConnell - Clever Consulting Srl.
+#
+#   This program is free software: you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation, either version 3 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+# this script needs the required sentry statistic as the 4th variable and can be one of the following keywords
+# "devices", "connections","thread", "system", "cpu","heap"
+# 
+
+
+
+# ####################################################
+# Set the script name variables
+# ####################################################
+mSCRIPTNAME=$(basename $0)
+mTEMP="$mSCRIPTNAME.XXXXXXXXXX"
+
+
+# ####################################################
+# Check for correct number of arguments/variables set
+# ####################################################
+if [ -z "$4" ]
+  then
+    echo "usage: check_mi_sentry_statistics <HOSTNAME> <USERNAME> <PASSWORD> <STATISTIC>"
+    exit 3
+fi
+
+# ####################################################
+# Set the script Variables
+# ####################################################
+mVSP=$1
+mVSP_USERNAME=$2
+mVSP_PASSWORD=$3
+#set the statistic to check
+mSTATISTIC=$4
+
+mCOOKIES=$(mktemp "/tmp/$mTEMP")
+mFILETMP1=$(mktemp "/tmp/$mTEMP")
+mFILETMP2=$(mktemp "/tmp/$mTEMP")
+
+
+# ####################################################
+# Remote Call to MobileIron Service Login
+# ####################################################
+curl -k --data "j_username=$mVSP_USERNAME&j_password=$mVSP_PASSWORD&spid=&submit=LOGIN" -H "Referer: https://$mVSP/mics/login.jsp" https://$mVSP/mics/j_spring_security_check --cookie-jar $mCOOKIES --location > $mFILETMP1
+
+# get NONCE Value
+mCSRFKEY=$(cat $mFILETMP1 | grep csrfKey | tr -s " " | cut -d "\"" -f2)
+mCSRFVALUE=$(cat $mFILETMP1 | grep csrfNonce | tr -s " " | cut -d "\"" -f2)
+
+# ####################################################
+# get sentry statistic
+# ####################################################
+curl -k "https://$mVSP/mics/mics.html?_dc=`date +%s`&&action=getSentryUtilization&command=getSentryUtilization" --cookie $mCOOKIES  -H "$mCSRFKEY: $mCSRFVALUE" --location  > $mFILETMP2
+
+mEXIT=3
+
+case $4 in
+"devices")
+	mSTATISTICVALUE=$(cat $mFILETMP2 | grep "Number" | cut -f2 | xargs | cut -d ":" -f5 | cut -d "\\" -f1)
+  	mSTATISTICSTRING="Number of Connected Devices  :"
+  	mEXIT=0
+  ;;
+"connections")
+  	mSTATISTICVALUE=$(cat $mFILETMP2 | grep "Number" | cut -f2 | xargs | cut -d ":" -f6 | cut -d "\\" -f1)
+  	mSTATISTICSTRING="Number of Open Connections   :"
+  	mEXIT=0
+  ;;
+"thread")
+  	mSTATISTICVALUE=$(cat $mFILETMP2 | grep "Utilization" | cut -f2 | xargs | cut -d ":" -f7 | cut -d "\\" -f1)
+  	mSTATISTICSTRING="Thread Pool Utilization      :"
+  	mEXIT=0
+  ;;
+"cpu")
+  	mSTATISTICVALUE=$(cat $mFILETMP2 | grep "Utilization" | cut -f2 | xargs | cut -d ":" -f8 | cut -d "\\" -f1)
+  	mSTATISTICSTRING="CPU Utilization              :"
+  	mEXIT=0
+  ;;
+"system")
+  	mSTATISTICVALUE=$(cat $mFILETMP2 | grep "Utilization" | cut -f2 | xargs | cut -d ":" -f9 | cut -d "\\" -f1)
+  	mSTATISTICSTRING="System Memory Utilization    :"
+  	mEXIT=0
+  ;;
+"heap")
+  	mSTATISTICVALUE=$(cat $mFILETMP2 | grep "Utilization" | cut -f2 | xargs | cut -d ":" -f10 | cut -d "\\" -f1)
+  	mSTATISTICSTRING="Heap Memory Utilization      :"
+  	mEXIT=0
+  ;;
+esac
+
+
+# ####################################################
+# Delete all files created during process
+# ####################################################
+
+rm -rf $mCOOKIES
+rm -rf $mFILETMP1
+rm -rf $mFILETMP2
+
+# ####################################################
+# Exit script
+# ####################################################
+if [[ $mEXIT = 0 ]]; then
+	mPERFDATASTATISTICVALUE=$(echo "$mSTATISTICVALUE" | cut -d " " -f2) 
+   	echo "$mSTATISTICSTRING$mSTATISTICVALUE | $4=$mPERFDATASTATISTICVALUE"
+	exit $mEXIT
+else
+   	echo "Check failed. You must use parameter statistic on devices,connections,thread,cpu,system or heap"
+   	exit 3
+fi
