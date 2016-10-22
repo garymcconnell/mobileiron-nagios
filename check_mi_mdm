@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#   MobileIron Core Apple MDM Certificate expiry level Nagios check script
+#   MobileIron Core Apple MDM Certificate expiry date Nagios check script
 #
 #   Copyright (C) 2016  Gary McConnell - Clever Consulting Srl.
 #	www.clevermobile.it

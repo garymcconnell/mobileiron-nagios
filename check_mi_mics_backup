@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#   MobileIron Core MICS backup verification Nagios check script
+#   MobileIron Core MICS backup status Nagios check script
 #
 #   Copyright (C) 2016  Gary McConnell - Clever Consulting Srl.
 #	www.clevermobile.it

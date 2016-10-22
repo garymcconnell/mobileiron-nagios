@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#   MobileIron Core Ldap Sync Diagnostics Nagios check script
+#   MobileIron Core Ldap Sync Log Diagnostics Nagios check script
 #
 #   Copyright (C) 2016  Gary McConnell - Clever Consulting Srl.
 #	www.clevermobile.it

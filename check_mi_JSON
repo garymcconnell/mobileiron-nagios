@@ -1,5 +1,6 @@
 
 #!/usr/bin/env bash
+#
 # adapted from https://github.com/dominictarr/JSON.sh
 
 throw () {
