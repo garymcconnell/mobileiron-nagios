@@ -1,5 +1,5 @@
 # mobileiron-nagios
-MobileIron Nagios application level scripts
+##MobileIron Nagios application level scripts
 
 Clever Consulting have developed a series of bash scripts which can be used to monitor the MobileIron platform.
 These scripts are divided into two distinct types:
@@ -9,13 +9,13 @@ The SNMP Monitoring scripts use standard nagios snmp checks to query the underly
 
 The MobileIron application level monitoring scripts interact with the MobileIron application querying for specific metrics and values. The metrics are retrieved by interacting with the MICS and MIFS web consoles provided by the MobileIron application.  In order to access the MICS and MIFS interfaces application level users must be created on the MobileIron platform and configured in the nagios check scripts.
 
-Metrics
+##Metrics
 The SNMP Monitoring checks currently monitor the following metrics:
-  MobileIron Host Resources via the SNMP MIB:
+  ###MobileIron Host Resources via the SNMP MIB:
     CPU
     DISK
     Network use
-  The MobileIron Application level checks currently monitor the following metrics:
+  ###The MobileIron Application level checks currently monitor the following metrics:
     MobileIron Core
     Application Status
     System Backup Status
@@ -28,7 +28,7 @@ The SNMP Monitoring checks currently monitor the following metrics:
     MobileIron Support Site reachability
     Ldap Connector Status
     Ldap Sync Status
-  MobileIron Sentry
+  ###MobileIron Sentry
     ActiveSync Backend Status
     NTP Status
     Core Status
@@ -39,35 +39,35 @@ The SNMP Monitoring checks currently monitor the following metrics:
     number of connected devices
     system memory usage 
     thread pool utilization
-  MobileIron Connector
+  ###MobileIron Connector
     NTP Status
     Core Status
     DNS Status
     
-Installation  
+#Installation  
 Installation is broken down into the following steps:
 1.Enable SNMP on MobileIron Appliances
 2.Create monitoring users on MobileIron applications to allow access from Nagios
 3.Install the Nagios MobileIron scripts
 4.Configure the Nagios scripts
 
-Enable SNMP on MobileIron Appliances
+##Enable SNMP on MobileIron Appliances
 On each MobileIron appliance which is to be monitored the snmp service must be enabled.  
-Enabling SNMP
+###Enabling SNMP
   Login to the MICS console on the appliance to be monitored (https://<appliance-address>/mics
   The SNMP Service is disabled by default. To turn it on:   
   Select Enable in the SNMP Control section
   Click on Apply
   
-Editing the Read only community string
+###Editing the Read only community string
   The default community string for the SNMP is set to public. To change this string:
   Edit the default string. 
   Click Apply.  
   
-Create Monitoring Users
+##Create Monitoring Users
   For each MobileIron appliance (Core, Sentry, LdapConnector) that needs to be monitored it is required to create an application level user both in the MICS and MIFS console. 
   
-MIFS (Core)
+###MIFS (Core)
 This procedure is applicable only to the CORE appliance, the mifs interface is not present on Sentry or Ldap Connector.
 Login to the MIFS console with an administrative user.
 Select "Users And Devices" -> "Users"
@@ -80,7 +80,7 @@ Click on "Actions" -> "Assign to Space"
 In the "Select Space" dropdown menu select "Global"
 On the presented form select ONLY "View Settings".  All other options should be disabled.
 
-MICS (System Console)
+###MICS (System Console)
 
 This procedure is applicable to all MobileIron appliances.
 Login to the MICS console with an administrative user.
@@ -90,11 +90,11 @@ Compile the form with all of the required fields (we suggest using a clear namin
 Click on "Apply"
 Click on "Save" (top right of screen" and then "OK".
 
-Install Nagios Scripts
+#Install Nagios Scripts
 
 The Nagios scripts can be divided into two distinct groups; snmp standard checks and MobileIron application level checks.
 
-SNMP commands install
+##SNMP commands install
 
 
 On your Nagios installation download and install the the following Nagios check scripts to your nagios plugins directory, this is "/usr/lib64/nagios/plugins" on my centos box
@@ -129,7 +129,7 @@ Ram : 91%, Swap : 22% : > 99, 20 ; WARNING | ram_used=3635664;3938462;3978244;0;
 
 Copy the file mi_commands_snmp.cfg  into the /etc/nagios/conf.d directory
 
-MobileIron Application level checks Install
+##MobileIron Application level checks Install
 
 copy the package file containing the mobileiron scripts to the Nagios server (MobileIronNagios.pkg.1.2.tar.gz for example).  Note that this package will also contain the snmp scripts as indicated in the previous section.
 
@@ -325,7 +325,7 @@ service nagios restart
 If the configuration is correct you should now have the snmp monitoring services present in your Nagios console for the LDAP Connector instance.
 
 
-Perfdata - Nagiosgraph
+##Perfdata - Nagiosgraph
 The following metrics are also providing perdata metrics.  The template configuration files are preconfigured to support nagiosgraph.  This should be removed from the configuration if it is not required.
 
 Remove nagiosgraph
@@ -336,7 +336,7 @@ sed -i "s/generic-service\,nagiosgraph/generic-service/g" /etc/nagios/conf.d/cle
 ``` 
 
 
-Note:
+##Note:
 the mics diagnostics arrays can change, run the following command to export the array on console:
 ``` bash
 for i in {0..9}; do (echo $i & ./check_mi_mics_diagnostics <VSP>:8443 <USERNAME> <PASSWORD> $i); done
