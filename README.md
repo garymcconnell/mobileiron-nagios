@@ -98,29 +98,33 @@ SNMP commands install
 
 
 On your Nagios installation download and install the the following Nagios check scripts to your nagios plugins directory, this is "/usr/lib64/nagios/plugins" on my centos box
-
+``` bash
 cd /usr/lib64/nagios/plugins
 wget http://nagios.manubulon.com/check_snmp_int.pl
 wget http://nagios.manubulon.com/check_snmp_load.pl
 wget http://nagios.manubulon.com/check_snmp_mem.pl
 wget http://nagios.manubulon.com/check_snmp_storage.pl
-
+``` 
 Change the permissions on the downloaded scripts so that they can be executed
-
+``` bash
 chmod 777 check_snmp_*.pl
-
+``` 
 Edit the check_snmp_mem.pl and check_snmp_storage.pl files to change the library location specific to your Nagios install.
 
 For my installation on centos, change :
+``` bash
 use lib "/usr/local/nagios/libexec";
+```
 to
+``` bash
 use lib "/usr/lib64/nagios/plugins";
+``` 
 Check to make sure that the scripts can query the MobileIron appliance correctly by running the check script directly from the command line.
-
+``` bash
  ./check_snmp_mem.pl -H testmdm.clever-consulting.com -C mipublic  -f -w 99,20 -c 100,85
 
 Ram : 91%, Swap : 22% : > 99, 20 ; WARNING | ram_used=3635664;3938462;3978244;0;3978244 swap_used=911936;838858;3565148;0;4194292
-
+``` 
  You should get a response like the above indicating the Ram and Swap used. The above query is using the parameters to provide a warning if RAM <99%, Swap <20% and critical if RAM is 100% and swap 30%. For details of the specific parameters please see the http://nagios.manubulon.com website.
 
 Copy the file mi_commands_snmp.cfg  into the /etc/nagios/conf.d directory
@@ -130,54 +134,55 @@ MobileIron Application level checks Install
 copy the package file containing the mobileiron scripts to the Nagios server (MobileIronNagios.pkg.1.2.tar.gz for example).  Note that this package will also contain the snmp scripts as indicated in the previous section.
 
 unzip the tarball to a temporary directory
-
+``` bash
 cd /tmp
 
 tar -zxvf MobileIronNagiosPkg.tar.gz
-
+``` 
 Note: run all files through dos2unix to ensure crlf's are converted.
 
 Change the scripts so they are localized to the server environment:
 
 Perl location:
-
+``` bash
 mNEW_PERL=$(which perl)
 
 sed -i "s/\/usr\/bin\/perl -w/$mNEW_PERL/g" *.pl
 
 sed -i "s/\/usr\/bin\/perl -w/$mNEW_PERL/g" mi_commands.cfg
-
+``` 
 Plugin directory for JSON plugin:
-
+``` bash
 # Change JSON plugin location (if necessary)
 
 mNEW_JSON=\/usr\/lib64\/nagios\/plugins\/check_mi_JSON
 
 sed -i "s/\/usr\/lib64\/nagios\/plugins\/check_mi_JSON/$mNEW_JSON/g" *.cfg
-
+``` 
 
 Copy the scripts to the nagios plugins directory and set the correct permissions
+``` bash
 cd /tmp/MobileIronNagiosPkg
 
 cp check_mi_* /usr/lib64/nagios/plugins
 
 chmod 777 /usr/lib64/nagios/plugins/check_mi_*
-
+``` 
 
 
 
 Copy the mi_commands.cfg file to the /etc/nagios/conf.d directory
-
+``` bash
 cp mi_commands.cfg /etc/nagios/conf.d
-
+``` 
 Define the Nagios server objects for the each MobileIron Core, Sentry and LdapConnector object
 
 For each CORE installation:
 
 copy the file template_core.cfg to the /etc/nagios/conf.d changing the name for the file to reflect the core name following the customer naming standards if any.
-
+``` bash
 cp /tmp/MobileIronNagiosPkg/template_core.cfg /etc/nagios/conf.d/clever.core.cfg
-
+``` 
 Define the following variables:
 
 MI_NAGIOS_NAME	Nagios Hostname
@@ -191,7 +196,7 @@ MI_NAGIOS_MICS_PASS 	MICS System level password
 
 
 Use the following commands to substitute the values in the file, set the variables accordingly and run the sed commands:
-
+``` bash
 mFile=/etc/nagios/conf.d/clever.core.cfg
 
 mNEW_MI_NAGIOS_NAME=
@@ -202,9 +207,9 @@ mNEW_MI_NAGIOS_MIFS_USER=
 mNEW_MI_NAGIOS_MIFS_PASS=
 mNEW_MI_NAGIOS_MICS_USER=
 mNEW_MI_NAGIOS_MICS_PASS=
-
+``` 
 Once the above variables have been set run the following commands
-
+``` bash
 sed -i "s/MI_NAGIOS_NAME/$mNEW_MI_NAGIOS_NAME/g" $mFILE.cfg
 sed -i "s/MI_NAGIOS_ALIAS/$mNEW_MI_NAGIOS_ALIAS/g" $mFILE.cfg
 sed -i "s/MI_NAGIOS_ADDRESS/$mNEW_MI_NAGIOS_ADDRESS/g" $mFILE.cfg
@@ -213,22 +218,24 @@ sed -i "s/MI_NAGIOS_MIFS_USER/$mNEW_MI_NAGIOS_MIFS_USER/g" $mFILE.cfg
 sed -i "s/MI_NAGIOS_MIFS_PASS/$mNEW_MI_NAGIOS_MIFS_PASS/g" $mFILE.cfg
 sed -i "s/MI_NAGIOS_MICS_USER/$mNEW_MI_NAGIOS_MICS_USER/g" $mFILE.cfg
 sed -i "s/MI_NAGIOS_MICS_PASS/$mNEW_MI_NAGIOS_MICS_PASS/g" $mFILE.cfg
-
+``` 
 
 Run the Nagios preflight checks and correct and errors if they are present.
-    /usr/sbin/nagios -v /etc/nagios/nagios.cfg
- 
+``` bash
+/usr/sbin/nagios -v /etc/nagios/nagios.cfg
+```  
 restart nagios to apply the new configurations
-    service nagios restart
- 
+``` bash
+service nagios restart
+```  
 If the configuration is correct you should now have the snmp monitoring services present in your Nagios console for the core instance.
 
 
 For each Sentry installation:
 copy the file template_sentry.cfg to the /etc/nagios/conf.d changing the name for the file to reflect the core name following the customer naming standards if any.
-
+``` bash
 cp /tmp/MobileIronNagiosPkg/template_core.cfg /etc/nagios/conf.d/clever.sentry.cfg
-
+``` 
 Define the following variables:
 
 MI_NAGIOS_NAME Nagios Hostname
@@ -240,7 +247,7 @@ MI_NAGIOS_MICS_PASS MICS System level password
 
 
 use the following commands to substitute the values in the file, set the variables accordingly and run the sed commands:
-
+``` bash
 mFile=/etc/nagios/conf.d/clever.sentry.cfg
 
 mNEW_MI_NAGIOS_NAME=
@@ -249,30 +256,33 @@ mNEW_MI_NAGIOS_ADDRESS=
 mNEW_MI_NAGIOS_SNMP=
 mNEW_MI_NAGIOS_MICS_USER=
 mNEW_MI_NAGIOS_MICS_PASS=
-
+``` 
 Once the above variables have been set run the following commands
-
+``` bash
 sed -i "s/MI_NAGIOS_NAME/$mNEW_MI_NAGIOS_NAME/g" $mFILE.cfg
 sed -i "s/MI_NAGIOS_ALIAS/$mNEW_MI_NAGIOS_ALIAS/g" $mFILE.cfg
 sed -i "s/MI_NAGIOS_ADDRESS/$mNEW_MI_NAGIOS_ADDRESS/g" $mFILE.cfg
 sed -i "s/MI_NAGIOS_SNMP/$mNEW_MI_NAGIOS_SNMP/g" $mFILE.cfg
 sed -i "s/MI_NAGIOS_MICS_USER/$mNEW_MI_NAGIOS_MICS_USER/g" $mFILE.cfg
 sed -i "s/MI_NAGIOS_MICS_PASS/$mNEW_MI_NAGIOS_MICS_PASS/g" $mFILE.cfg
-
+``` 
 
 Run the Nagios preflight checks and correct and errors if they are present.
-    /usr/sbin/nagios -v /etc/nagios/nagios.cfg
- 
+``` bash
+/usr/sbin/nagios -v /etc/nagios/nagios.cfg
+``` 
+
 restart nagios to apply the new configurations
-    service nagios restart
- 
+``` bash
+service nagios restart
+```  
 If the configuration is correct you should now have the snmp monitoring services present in your Nagios console for the Sentry instance.
 
 For each LDAP Connector installation:
 copy the file template_sentry.cfg to the /etc/nagios/conf.d changing the name for the file to reflect the core name following the customer naming standards if any.
-
+``` bash
 cp /tmp/MobileIronNagiosPkg/template_core.cfg /etc/nagios/conf.d/clever.ldapconnector.cfg
-
+``` 
 Define the following variables:
 
 MI_NAGIOS_NAME Nagios Hostname
@@ -284,7 +294,7 @@ MI_NAGIOS_MICS_PASS MICS System level password
 
 
 use the following commands to substitute the values in the file, set the variables accordingly and run the sed commands:
-
+``` bash
 mFile=/etc/nagios/conf.d/clever.ldapconnector.cfg
 
 mNEW_MI_NAGIOS_NAME=
@@ -293,23 +303,25 @@ mNEW_MI_NAGIOS_ADDRESS=
 mNEW_MI_NAGIOS_SNMP=
 mNEW_MI_NAGIOS_MICS_USER=
 mNEW_MI_NAGIOS_MICS_PASS=
-
+``` 
 Once the above variables have been set run the following commands
-
+``` bash
 sed -i "s/MI_NAGIOS_NAME/$mNEW_MI_NAGIOS_NAME/g" $mFILE.cfg
 sed -i "s/MI_NAGIOS_ALIAS/$mNEW_MI_NAGIOS_ALIAS/g" $mFILE.cfg
 sed -i "s/MI_NAGIOS_ADDRESS/$mNEW_MI_NAGIOS_ADDRESS/g" $mFILE.cfg
 sed -i "s/MI_NAGIOS_SNMP/$mNEW_MI_NAGIOS_SNMP/g" $mFILE.cfg
 sed -i "s/MI_NAGIOS_MICS_USER/$mNEW_MI_NAGIOS_MICS_USER/g" $mFILE.cfg
 sed -i "s/MI_NAGIOS_MICS_PASS/$mNEW_MI_NAGIOS_MICS_PASS/g" $mFILE.cfg
-
+``` 
 
 Run the Nagios preflight checks and correct and errors if they are present.
-    /usr/sbin/nagios -v /etc/nagios/nagios.cfg
- 
+``` bash
+/usr/sbin/nagios -v /etc/nagios/nagios.cfg
+```  
 restart nagios to apply the new configurations
-    service nagios restart
- 
+``` bash
+service nagios restart
+```  
 If the configuration is correct you should now have the snmp monitoring services present in your Nagios console for the LDAP Connector instance.
 
 
@@ -317,13 +329,15 @@ Perfdata - Nagiosgraph
 The following metrics are also providing perdata metrics.  The template configuration files are preconfigured to support nagiosgraph.  This should be removed from the configuration if it is not required.
 
 Remove nagiosgraph
+``` bash
 sed -i "s/generic-service\,nagiosgraph/generic-service/g" /etc/nagios/conf.d/clever.core.cfg
 sed -i "s/generic-service\,nagiosgraph/generic-service/g" /etc/nagios/conf.d/clever.sentry.cfg
 sed -i "s/generic-service\,nagiosgraph/generic-service/g" /etc/nagios/conf.d/clever.ldapconnector.cfg
-
+``` 
 
 
 Note:
 the mics diagnostics arrays can change, run the following command to export the array on console:
-
+``` bash
 for i in {0..9}; do (echo $i & ./check_mi_mics_diagnostics <VSP>:8443 <USERNAME> <PASSWORD> $i); done
+``` 
