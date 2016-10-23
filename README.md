@@ -184,7 +184,7 @@ copy the file template_core.cfg to the /etc/nagios/conf.d changing the name for 
 cp /tmp/MobileIronNagiosPkg/template_core.cfg /etc/nagios/conf.d/clever.core.cfg
 ``` 
 Define the following variables:
-
+``` bash
 MI_NAGIOS_NAME	Nagios Hostname
 MI_NAGIOS_ALIAS	Nagios Alias
 MI_NAGIOS_ADDRESS	ip or dns address 
@@ -193,7 +193,7 @@ MI_NAGIOS_MIFS_USER 	MIFS Application level usernameConfigure Nagios Scripts
 MI_NAGIOS_MIFS_PASS 	MIFS Application level password
 MI_NAGIOS_MICS_USER 	MICS System level username
 MI_NAGIOS_MICS_PASS 	MICS System level password
-
+``` 
 
 Use the following commands to substitute the values in the file, set the variables accordingly and run the sed commands:
 ``` bash
@@ -237,14 +237,14 @@ copy the file template_sentry.cfg to the /etc/nagios/conf.d changing the name fo
 cp /tmp/MobileIronNagiosPkg/template_core.cfg /etc/nagios/conf.d/clever.sentry.cfg
 ``` 
 Define the following variables:
-
+``` bash
 MI_NAGIOS_NAME Nagios Hostname
 MI_NAGIOS_ALIAS Nagios Alias
 MI_NAGIOS_ADDRESS ip or dns address 
 MI_NAGIOS_SNMP snmp communitity as set in MICS
 MI_NAGIOS_MICS_USER MICS System level username
 MI_NAGIOS_MICS_PASS MICS System level password
-
+``` 
 
 use the following commands to substitute the values in the file, set the variables accordingly and run the sed commands:
 ``` bash
