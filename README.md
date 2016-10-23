@@ -11,11 +11,12 @@ The MobileIron application level monitoring scripts interact with the MobileIron
 
 ##Metrics
 The SNMP Monitoring checks currently monitor the following metrics:
-  ###MobileIron Host Resources via the SNMP MIB:
+###MobileIron Host Resources via the SNMP MIB:
 *    CPU
 *    DISK
 *    Network use
-  ###The MobileIron Application level checks currently monitor the following metrics:
+
+###The MobileIron Application level checks currently monitor the following metrics:
 *    MobileIron Core
 *    Application Status
 *    System Backup Status
@@ -28,7 +29,8 @@ The SNMP Monitoring checks currently monitor the following metrics:
 *    MobileIron Support Site reachability
 *    Ldap Connector Status
 *    Ldap Sync Status
-  ###MobileIron Sentry
+
+###MobileIron Sentry
 *    ActiveSync Backend Status
 *   NTP Status
 *    Core Status
@@ -39,7 +41,8 @@ The SNMP Monitoring checks currently monitor the following metrics:
 *    number of connected devices
 *    system memory usage 
 *    thread pool utilization
-  ###MobileIron Connector
+
+###MobileIron Connector
 *    NTP Status
 *    Core Status
 *    DNS Status
