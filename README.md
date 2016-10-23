@@ -12,44 +12,44 @@ The MobileIron application level monitoring scripts interact with the MobileIron
 ##Metrics
 The SNMP Monitoring checks currently monitor the following metrics:
   ###MobileIron Host Resources via the SNMP MIB:
-    CPU
-    DISK
-    Network use
+*    CPU
+*    DISK
+*    Network use
   ###The MobileIron Application level checks currently monitor the following metrics:
-    MobileIron Core
-    Application Status
-    System Backup Status
-    SSL Certificate Expiry
-    MDM Certificate Expiry
-    DNS Gateway health
-    EMAIL relay health
-    MapQuest health
-    NTP Health
-    MobileIron Support Site reachability
-    Ldap Connector Status
-    Ldap Sync Status
+*    MobileIron Core
+*    Application Status
+*    System Backup Status
+*   SSL Certificate Expiry
+*    MDM Certificate Expiry
+*    DNS Gateway health
+*    EMAIL relay health
+*    MapQuest health
+*    NTP Health
+*    MobileIron Support Site reachability
+*    Ldap Connector Status
+*    Ldap Sync Status
   ###MobileIron Sentry
-    ActiveSync Backend Status
-    NTP Status
-    Core Status
-    DNS Status
-    number of open connections
-    cpu utilization
-    heap memory usage
-    number of connected devices
-    system memory usage 
-    thread pool utilization
+*    ActiveSync Backend Status
+*   NTP Status
+*    Core Status
+*    DNS Status
+*    number of open connections
+*    cpu utilization
+*    heap memory usage
+*    number of connected devices
+*    system memory usage 
+*    thread pool utilization
   ###MobileIron Connector
-    NTP Status
-    Core Status
-    DNS Status
+*    NTP Status
+*    Core Status
+*    DNS Status
     
 #Installation  
 Installation is broken down into the following steps:
-1.Enable SNMP on MobileIron Appliances
-2.Create monitoring users on MobileIron applications to allow access from Nagios
-3.Install the Nagios MobileIron scripts
-4.Configure the Nagios scripts
+1. Enable SNMP on MobileIron Appliances
+2. Create monitoring users on MobileIron applications to allow access from Nagios
+3. Install the Nagios MobileIron scripts
+4. Configure the Nagios scripts
 
 ##Enable SNMP on MobileIron Appliances
 On each MobileIron appliance which is to be monitored the snmp service must be enabled.  
