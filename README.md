@@ -32,7 +32,7 @@ The SNMP Monitoring checks currently monitor the following metrics:
 
 ###MobileIron Sentry
 *    ActiveSync Backend Status
-*   NTP Status
+*    NTP Status
 *    Core Status
 *    DNS Status
 *    number of open connections
@@ -81,7 +81,7 @@ Select the "Admin" -> "Admins" menu in the console.
 Select the userid created in the step above
 Click on "Actions" -> "Assign to Space"
 In the "Select Space" dropdown menu select "Global"
-On the presented form select ONLY "View Settings".  All other options should be disabled.
+On the presented form select ONLY "Settings Management -> View Settings".  All other options should be disabled.
 
 ###MICS (System Console)
 
